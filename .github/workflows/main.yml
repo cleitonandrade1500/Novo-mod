@@ -1,28 +1,39 @@
-name: Build PS4 Mod
+name: Build RDR2 PS4 Mod (CUSA03140 1.32)
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout do seu Codigo
+        uses: actions/checkout@v4
 
-    - name: Install OpenOrbis Toolchain
-      run: |
-        # Baixando a versão estável para Linux
-        wget https://github.com
-        tar -xzf OpenOrbis-PS4-Toolchain-Linux.tar.gz
-        # Define a variável de ambiente para o resto do processo
-        echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/OpenOrbis" >> $GITHUB_ENV
+      - name: Instalar Clang e LLD (Instrucoes da Imagem)
+        run: |
+          sudo apt update
+          sudo apt install clang lld -y
 
-    - name: Build Mod
-      run: |
-        # Adicionando o compilador ao PATH e rodando o make
-        export PATH=$GITHUB_ENV/bin:$PATH
-        make
+      - name: Baixar e Configurar OpenOrbis SDK
+        run: |
+          # Download do SDK via curl (segue redirecionamentos)
+          curl -L https://github.com -o orbis-toolchain.tar.gz
+          
+          # Cria a pasta e extrai (strip-components evita pastas extras)
+          mkdir -p $GITHUB_WORKSPACE/OpenOrbis
+          tar -xzf orbis-toolchain.tar.gz -C $GITHUB_WORKSPACE/OpenOrbis --strip-components=1
+          
+          # Configura a variavel OO_PS4_TOOLCHAIN (Conforme a imagem)
+          echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/OpenOrbis" >> $GITHUB_ENV
+          # Adiciona o bin do SDK ao PATH do sistema
+          echo "$GITHUB_WORKSPACE/OpenOrbis/bin" >> $GITHUB_PATH
 
-    - name: Upload Result
-      uses: actions/upload-artifact@v4
-      with:
-        name: RDR2_Mod_PS4_CUSA03140
-        path: Havana_RDR2_Mod.prx
+      - name: Compilar Mod (RDR2 Bank Robbery)
+        run: |
+          # Chama o Makefile que criamos anteriormente
+          make
+
+      - name: Disponibilizar o arquivo .prx para Download
+        uses: actions/upload-artifact@v4
+        with:
+          name: RDR2_Assalto_PS4_1.32
+          path: "*.prx"
