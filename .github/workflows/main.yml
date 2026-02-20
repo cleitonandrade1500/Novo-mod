@@ -1,4 +1,4 @@
-name: Build PS4 Mod
+name: Build RDR2 PS4 Mod
 on: [push]
 
 jobs:
@@ -13,27 +13,29 @@ jobs:
           sudo apt update
           sudo apt install clang lld -y
 
-      - name: Baixar SDK OpenOrbis (Metodo Seguro)
+      - name: Baixar SDK OpenOrbis (Metodo Oficial)
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          # Baixa o SDK usando um User-Agent para evitar o bloqueio do GitHub
-          curl -A "Mozilla/5.0" -L "https://github.com" -o sdk.tar.gz
+          # Usa a ferramenta oficial do GitHub para baixar o release
+          gh release download v1.1 \
+            --repo openorbis/openorbis-ps4-toolchain \
+            --pattern 'OpenOrbis-PS4-Toolchain-Linux.tar.gz' \
+            --output sdk.tar.gz
           
-          # Cria a pasta e extrai
+          # Cria a pasta e extrai (sem a opcao -z se o arquivo for apenas tar)
           mkdir -p $GITHUB_WORKSPACE/SDK
-          tar -xzf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
+          tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # Configura as variaveis de ambiente
+          # Configura as variaveis conforme a imagem do SDK
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
       - name: Compilar Mod (Make)
-        run: |
-          # Define o compilador explicitamente e roda o make
-          export PATH=$OO_PS4_TOOLCHAIN/bin:$PATH
-          make
+        run: make
 
       - name: Disponibilizar Mod .prx
         uses: actions/upload-artifact@v4
         with:
-          name: RDR2_Assalto_CUSA03140
+          name: RDR2_Assalto_Final
           path: "*.prx"
