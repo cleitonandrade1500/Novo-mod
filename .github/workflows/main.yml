@@ -1,4 +1,4 @@
-name: Build RDR2 PS4 Mod (Google Drive SDK)
+name: Build RDR2 PS4 Mod (CUSA03140 1.32)
 on: [push]
 
 jobs:
@@ -8,16 +8,17 @@ jobs:
       - name: Checkout do Codigo
         uses: actions/checkout@v4
 
-      - name: Instalar Clang e LLD
+      - name: Instalar Dependencias e Gdown
         run: |
           sudo apt update
-          sudo apt install clang lld -y
+          sudo apt install clang lld python3-pip -y
+          pip3 install gdown
 
-      - name: Baixar SDK do Google Drive
+      - name: Baixar SDK do Google Drive (Arquivo Grande)
         run: |
           mkdir -p $GITHUB_WORKSPACE/SDK
-          # Download do link que voce enviou usando curl -L
-          curl -L "https://drive.usercontent.google.com" -o sdk.tar.gz
+          # Usa o gdown para baixar o arquivo pulando o aviso de virus do Google
+          gdown --id 1O1h45BYFL6iI7yyUqVvab53IAVhZqFiT -O sdk.tar.gz
           
           # Extrai o arquivo (o comando -xf detecta o formato automaticamente)
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
@@ -32,8 +33,8 @@ jobs:
           export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
           make
 
-      - name: Download do Mod Pronto (.prx)
+      - name: Download do Mod (.prx)
         uses: actions/upload-artifact@v4
         with:
-          name: RDR2_Assalto_Final_CUSA03140
+          name: RDR2_Assalto_Final
           path: "*.prx"
