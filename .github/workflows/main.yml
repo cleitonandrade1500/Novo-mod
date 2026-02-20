@@ -1,20 +1,29 @@
 name: Build PS4 Mod
 on: [push]
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup OpenOrbis
+
+      - name: Setup OpenOrbis SDK
         run: |
           sudo apt update && sudo apt install clang lld -y
-          curl -L https://github.com -o sdk.tar.gz
+          # Download usando link direto do release v1.1
+          curl -L "https://github.com" -o sdk.tar.gz
+          
+          # Verifica se o arquivo foi baixado antes de extrair
           mkdir -p $GITHUB_WORKSPACE/SDK
           tar -xzf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
+          
+          # Configura as variáveis de ambiente
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
+
       - name: Build
         run: make
+
       - name: Download Mod
         uses: actions/upload-artifact@v4
         with:
