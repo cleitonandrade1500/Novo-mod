@@ -1,4 +1,4 @@
-name: Build RDR2 PS4 Mod (v0.5.4)
+name: Build RDR2 PS4 Mod (Google Drive SDK)
 on: [push]
 
 jobs:
@@ -13,11 +13,11 @@ jobs:
           sudo apt update
           sudo apt install clang lld -y
 
-      - name: Baixar SDK OpenOrbis v0.5.4 (Link da Imagem)
+      - name: Baixar SDK do Google Drive
         run: |
           mkdir -p $GITHUB_WORKSPACE/SDK
-          # Download do arquivo toolchain-llvm-18.tar.gz que aparece na sua foto
-          curl -L -A "Mozilla/5.0" "https://github.com" -o sdk.tar.gz
+          # Download do link que voce enviou usando curl -L
+          curl -L "https://drive.usercontent.google.com" -o sdk.tar.gz
           
           # Extrai o arquivo (o comando -xf detecta o formato automaticamente)
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
@@ -32,8 +32,8 @@ jobs:
           export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
           make
 
-      - name: Download do Mod (.prx)
+      - name: Download do Mod Pronto (.prx)
         uses: actions/upload-artifact@v4
         with:
-          name: RDR2_Assalto_Final
+          name: RDR2_Assalto_Final_CUSA03140
           path: "*.prx"
