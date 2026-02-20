@@ -1,5 +1,5 @@
 Target      = Havana_RDR2_Mod
-OBJS        = main.o
+OBJS = main.o plugin.o
 
 LIBS        = -lSceLibKernel -lScePad
 CFLAGS      = -O3 -std=c++17 -fPIC -I$(OO_PS4_TOOLCHAIN)/include
