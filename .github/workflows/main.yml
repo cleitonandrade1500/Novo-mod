@@ -8,35 +8,34 @@ jobs:
       - name: Checkout do Codigo
         uses: actions/checkout@v4
 
-      - name: Instalar Clang e LLD
+      - name: Instalar Compiladores
         run: |
           sudo apt update
-          sudo apt install clang lld -y
+          sudo apt install clang lld make -y
 
-      - name: Baixar SDK OpenOrbis (Link Estavel)
+      - name: Baixar SDK OpenOrbis (Link Corrigido)
         run: |
-          # Cria a pasta para o SDK
           mkdir -p $GITHUB_WORKSPACE/SDK
-          
-          # Download usando o link direto do repositório oficial (versao Linux)
-          # O parametro -L e fundamental para seguir o redirecionamento
+          # Usando link direto que não redireciona para erro
           curl -L "https://github.com" -o sdk.tar.gz
           
-          # Extrai o arquivo (o comando -xf detecta o formato automaticamente)
+          # Extrai sem a flag -z para evitar o erro de formato da imagem
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # Configura as variaveis conforme a sua imagem anterior
+          # Configura as variaveis conforme a sua imagem
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
-      - name: Compilar Mod (Make)
+      - name: Criar Makefile e Compilar
         run: |
-          # Adiciona o compilador ao PATH e executa o Makefile
-          export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
+          # Cria um Makefile simples para garantir que o build funcione
+          printf "Target = RDR2_Assalto\nOBJS = main.o\nall: \$(Target).prx\n\$(Target).prx: \$(OBJS)\n\torbis-clang++ -shared -L\$(OO_PS4_TOOLCHAIN)/lib -lSceLibKernel -o \$@ \$^\nmain.o: main.cpp\n\torbis-clang++ -O3 -std=c++17 -fPIC -I\$(OO_PS4_TOOLCHAIN)/include -c -o \$@ \$<" > Makefile
+          
+          # Executa a compilação
           make
 
-      - name: Download do Mod Pronto (.prx)
+      - name: Baixar o Mod Pronto (.prx)
         uses: actions/upload-artifact@v4
         with:
-          name: RDR2_Assalto_Final
+          name: RDR2_Assalto_PS4
           path: "*.prx"
