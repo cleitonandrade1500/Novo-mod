@@ -8,30 +8,35 @@ jobs:
       - name: Checkout do Codigo
         uses: actions/checkout@v4
 
-      - name: Executar Script de Compilacao Completo
+      - name: Instalar Clang e LLD
         run: |
-          # 1. Instalar Clang/LLD (Conforme sua imagem)
-          sudo apt update && sudo apt install clang lld -y
+          sudo apt update
+          sudo apt install clang lld -y
 
-          # 2. Baixar SDK OpenOrbis v1.1 (Link Direto)
-          echo "Baixando SDK..."
-          curl -L -A "Mozilla/5.0" "https://github.com" -o sdk.tar.gz
-          
-          # 3. Extrair e Configurar Variaveis
+      - name: Baixar SDK OpenOrbis (Link Estavel)
+        run: |
+          # Cria a pasta para o SDK
           mkdir -p $GITHUB_WORKSPACE/SDK
+          
+          # Download usando o link direto do repositório oficial (versao Linux)
+          # O parametro -L e fundamental para seguir o redirecionamento
+          curl -L "https://github.com" -o sdk.tar.gz
+          
+          # Extrai o arquivo (o comando -xf detecta o formato automaticamente)
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
-          export OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK
-          export PATH=$OO_PS4_TOOLCHAIN/bin:$PATH
+          
+          # Configura as variaveis conforme a sua imagem anterior
+          echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
+          echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
-          # 4. Criar o Makefile e o main.cpp na hora (Garante que os arquivos existam)
-          printf "Target = Havana_RDR2_Mod\nOBJS = main.o\nCFLAGS = -O3 -std=c++17 -fPIC -I\$(OO_PS4_TOOLCHAIN)/include\nLDFLAGS = -shared -L\$(OO_PS4_TOOLCHAIN)/lib -lSceLibKernel -lScePad -lc++\nall: \$(Target).prx\n\$(Target).prx: \$(OBJS)\n\torbis-clang++ \$(CFLAGS) \$(LDFLAGS) -o \$@ \$^\n%.o: %%.cpp\n\torbis-clang++ \$(CFLAGS) -c -o \$@ \$<" > Makefile
-
-          # 5. Compilar o Mod
-          echo "Compilando RDR2 Mod (v1.32)..."
+      - name: Compilar Mod (Make)
+        run: |
+          # Adiciona o compilador ao PATH e executa o Makefile
+          export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
           make
 
       - name: Download do Mod Pronto (.prx)
         uses: actions/upload-artifact@v4
         with:
-          name: RDR2_Assalto_PS4
+          name: RDR2_Assalto_Final
           path: "*.prx"
