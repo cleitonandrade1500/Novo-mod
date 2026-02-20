@@ -19,6 +19,7 @@ jobs:
           mkdir -p $GITHUB_WORKSPACE/SDK
           
           # Download via curl com User-Agent para evitar o erro de HTML/GZIP
+          # Este link e o oficial da versao 0.5.2 para Linux
           curl -L -A "Mozilla/5.0" "https://github.com" -o sdk.tar.gz
           
           # Extrai o arquivo (o comando -xf detecta o formato automaticamente)
