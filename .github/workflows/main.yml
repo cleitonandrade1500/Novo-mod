@@ -13,28 +13,28 @@ jobs:
           sudo apt update
           sudo apt install clang lld -y
 
-      - name: Baixar SDK OpenOrbis (Metodo Oficial)
+      - name: Baixar SDK OpenOrbis (Versao Estavel)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Usa a ferramenta oficial do GitHub para baixar o release
-          gh release download v1.1 \
+          # Baixa o SDK usando a Tag v0.5, que e a versao estavel de Linux mais comum
+          gh release download v0.5 \
             --repo openorbis/openorbis-ps4-toolchain \
             --pattern 'OpenOrbis-PS4-Toolchain-Linux.tar.gz' \
             --output sdk.tar.gz
           
-          # Cria a pasta e extrai (sem a opcao -z se o arquivo for apenas tar)
+          # Cria a pasta e extrai
           mkdir -p $GITHUB_WORKSPACE/SDK
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # Configura as variaveis conforme a imagem do SDK
+          # Configura as variaveis conforme a sua imagem
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
       - name: Compilar Mod (Make)
         run: make
 
-      - name: Disponibilizar Mod .prx
+      - name: Upload do Plugin .prx
         uses: actions/upload-artifact@v4
         with:
           name: RDR2_Assalto_Final
