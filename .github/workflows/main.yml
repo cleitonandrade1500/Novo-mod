@@ -1,20 +1,28 @@
 name: Build PS4 Mod
 on: [push]
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Install OpenOrbis
+    - uses: actions/checkout@v4
+
+    - name: Install OpenOrbis Toolchain
       run: |
+        # Baixando a versão estável para Linux
         wget https://github.com
-        tar -xvf OpenOrbis-PS4-Toolchain-Linux.tar.gz
+        tar -xzf OpenOrbis-PS4-Toolchain-Linux.tar.gz
+        # Define a variável de ambiente para o resto do processo
+        echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/OpenOrbis" >> $GITHUB_ENV
+
     - name: Build Mod
       run: |
-        export OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/OpenOrbis
+        # Adicionando o compilador ao PATH e rodando o make
+        export PATH=$GITHUB_ENV/bin:$PATH
         make
+
     - name: Upload Result
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
-        name: RDR2_Mod_PS4
+        name: RDR2_Mod_PS4_CUSA03140
         path: Havana_RDR2_Mod.prx
