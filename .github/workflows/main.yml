@@ -1,41 +1,45 @@
-name: Compilar RDR2 BankMod PS4
+name: Build RDR2 PS4 Mod (Metodo Infalivel)
 on: [push]
 
 jobs:
-  build_mod:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do Codigo
         uses: actions/checkout@v4
 
-      - name: Instalar Compiladores
+      - name: Instalar Clang e LLD
         run: |
           sudo apt update
-          sudo apt install clang lld make -y
+          sudo apt install clang lld -y
 
-      - name: Baixar SDK OpenOrbis (Link Corrigido)
+      - name: Baixar SDK OpenOrbis (Via GitHub CLI)
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          # Cria a pasta de destino
           mkdir -p $GITHUB_WORKSPACE/SDK
-          # Usando link direto que não redireciona para erro
-          curl -L "https://github.com" -o sdk.tar.gz
           
-          # Extrai sem a flag -z para evitar o erro de formato da imagem
+          # Baixa o SDK usando a ferramenta oficial (evita erro de gzip/html)
+          gh release download v0.5 \
+            --repo openorbis/openorbis-ps4-toolchain \
+            --pattern 'OpenOrbis-PS4-Toolchain-Linux.tar.gz' \
+            --output sdk.tar.gz
+          
+          # Extrai o SDK
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # Configura as variaveis conforme a sua imagem
+          # Configura as variaveis de ambiente
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
-      - name: Criar Makefile e Compilar
+      - name: Compilar Mod (RDR2 v1.32)
         run: |
-          # Cria um Makefile simples para garantir que o build funcione
-          printf "Target = RDR2_Assalto\nOBJS = main.o\nall: \$(Target).prx\n\$(Target).prx: \$(OBJS)\n\torbis-clang++ -shared -L\$(OO_PS4_TOOLCHAIN)/lib -lSceLibKernel -o \$@ \$^\nmain.o: main.cpp\n\torbis-clang++ -O3 -std=c++17 -fPIC -I\$(OO_PS4_TOOLCHAIN)/include -c -o \$@ \$<" > Makefile
-          
-          # Executa a compilação
+          # Força o uso do compilador que acabamos de baixar
           make
 
-      - name: Baixar o Mod Pronto (.prx)
+      - name: Download do Mod (.prx)
         uses: actions/upload-artifact@v4
         with:
-          name: RDR2_Assalto_PS4
+          name: RDR2_Assalto_Final
           path: "*.prx"
