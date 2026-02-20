@@ -1,4 +1,4 @@
-name: Build RDR2 PS4 Mod (CUSA03140 1.32)
+name: Build RDR2 PS4 Mod (v0.5.4)
 on: [push]
 
 jobs:
@@ -13,10 +13,10 @@ jobs:
           sudo apt update
           sudo apt install clang lld -y
 
-      - name: Baixar SDK OpenOrbis (Metodo Corrigido)
+      - name: Baixar SDK OpenOrbis v0.5.4 (Link da Imagem)
         run: |
           mkdir -p $GITHUB_WORKSPACE/SDK
-          # Download com link direto da versao 0.5.2 para Linux
+          # Download do arquivo toolchain-llvm-18.tar.gz que aparece na sua foto
           curl -L -A "Mozilla/5.0" "https://github.com" -o sdk.tar.gz
           
           # Extrai o arquivo (o comando -xf detecta o formato automaticamente)
