@@ -5,27 +5,35 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout do Codigo
+        uses: actions/checkout@v4
 
-      - name: Setup OpenOrbis SDK
+      - name: Instalar Clang e LLD
         run: |
-          sudo apt update && sudo apt install clang lld -y
-          # Download usando link direto do release v1.1
-          curl -L "https://github.com" -o sdk.tar.gz
+          sudo apt update
+          sudo apt install clang lld -y
+
+      - name: Baixar SDK OpenOrbis (Metodo Seguro)
+        run: |
+          # Baixa o SDK usando um User-Agent para evitar o bloqueio do GitHub
+          curl -A "Mozilla/5.0" -L "https://github.com" -o sdk.tar.gz
           
-          # Verifica se o arquivo foi baixado antes de extrair
+          # Cria a pasta e extrai
           mkdir -p $GITHUB_WORKSPACE/SDK
           tar -xzf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # Configura as variáveis de ambiente
+          # Configura as variaveis de ambiente
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
-      - name: Build
-        run: make
+      - name: Compilar Mod (Make)
+        run: |
+          # Define o compilador explicitamente e roda o make
+          export PATH=$OO_PS4_TOOLCHAIN/bin:$PATH
+          make
 
-      - name: Download Mod
+      - name: Disponibilizar Mod .prx
         uses: actions/upload-artifact@v4
         with:
-          name: RDR2_Mod_PRX
+          name: RDR2_Assalto_CUSA03140
           path: "*.prx"
