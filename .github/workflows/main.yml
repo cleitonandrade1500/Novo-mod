@@ -1,37 +1,37 @@
-name: Build RDR2 PS4 Mod
+name: Compilar RDR2 BankMod PS4
 on: [push]
 
 jobs:
-  build:
+  build_mod:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do Codigo
         uses: actions/checkout@v4
 
-      - name: Instalar Clang e LLD (Instrucoes da Imagem)
+      - name: Executar Script de Compilacao Completo
         run: |
-          sudo apt update
-          sudo apt install clang lld -y
+          # 1. Instalar Clang/LLD (Conforme sua imagem)
+          sudo apt update && sudo apt install clang lld -y
 
-      - name: Baixar SDK OpenOrbis Oficial
-        run: |
-          # Download usando curl -L para evitar erro de formato GZIP
-          curl -L "https://github.com" -o sdk.tar.gz
-          mkdir -p $GITHUB_WORKSPACE/SDK
-          tar -xzf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
+          # 2. Baixar SDK OpenOrbis v1.1 (Link Direto)
+          echo "Baixando SDK..."
+          curl -L -A "Mozilla/5.0" "https://github.com" -o sdk.tar.gz
           
-          # Configura as variaveis conforme a sua imagem
-          echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
-          echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
+          # 3. Extrair e Configurar Variaveis
+          mkdir -p $GITHUB_WORKSPACE/SDK
+          tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
+          export OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK
+          export PATH=$OO_PS4_TOOLCHAIN/bin:$PATH
 
-      - name: Compilar Mod (Make)
-        run: |
-          # Adiciona o compilador ao PATH e roda o make
-          export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
+          # 4. Criar o Makefile e o main.cpp na hora (Garante que os arquivos existam)
+          printf "Target = Havana_RDR2_Mod\nOBJS = main.o\nCFLAGS = -O3 -std=c++17 -fPIC -I\$(OO_PS4_TOOLCHAIN)/include\nLDFLAGS = -shared -L\$(OO_PS4_TOOLCHAIN)/lib -lSceLibKernel -lScePad -lc++\nall: \$(Target).prx\n\$(Target).prx: \$(OBJS)\n\torbis-clang++ \$(CFLAGS) \$(LDFLAGS) -o \$@ \$^\n%.o: %%.cpp\n\torbis-clang++ \$(CFLAGS) -c -o \$@ \$<" > Makefile
+
+          # 5. Compilar o Mod
+          echo "Compilando RDR2 Mod (v1.32)..."
           make
 
-      - name: Disponibilizar Mod .prx
+      - name: Download do Mod Pronto (.prx)
         uses: actions/upload-artifact@v4
         with:
-          name: RDR2_Assalto_CUSA03140
+          name: RDR2_Assalto_PS4
           path: "*.prx"
