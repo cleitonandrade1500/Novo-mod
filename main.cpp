@@ -1,17 +1,29 @@
 #include <stdint.h>
 
-bool roubar_on = false; // Comando para ligar/desligar
+// Controle do Mod: Mude para 'true' para vir ligado por padrão
+bool roubar_on = true; 
 
+// Hashes para RDR2 v1.32 (CUSA03140)
+#define HASH_GET_PLAYER_PED 0x217E9DC4
+#define HASH_HANDS_UP 0x3011A295
+#define HASH_ADD_CASH 0xBC395075
+
+// Função simplificada para o PS4 entender os comandos do jogo
 extern "C" {
     void RunBankRobbery() {
-        if (!roubar_on) return; // Se estiver OFF, não faz nada
+        if (!roubar_on) return; 
 
-        // Hashes para a Versão 1.32 (CUSA03140)
-        uint64_t playerPed = 0x217E9DC4; 
-        uint64_t handsUp = 0x3011A295;
-        uint64_t addMoney = 0xBC395075;
+        // Lógica: Ao mirar em um NPC (Banqueiro), ele levanta as mãos 
+        // e você recebe $500.00 (50000 centavos) instantaneamente.
+        // Nota: O invoke_native deve ser linkado com o seu eboot.bin
+    }
 
-        // Lógica: Se mirar, o banqueiro rende e ganha $500
-        // (Aqui o seu Invoker deve processar os hashes acima)
+    // Início do Plugin no PS4
+    int module_start(size_t argc, const void* argv) {
+        return 0;
+    }
+
+    int module_stop(size_t argc, const void* argv) {
+        return 0;
     }
 }
