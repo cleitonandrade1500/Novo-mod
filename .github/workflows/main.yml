@@ -1,4 +1,4 @@
-name: Build RDR2 PS4 Mod (Metodo Infalivel)
+name: Build RDR2 PS4 Mod (CUSA03140 1.32)
 on: [push]
 
 jobs:
@@ -13,29 +13,25 @@ jobs:
           sudo apt update
           sudo apt install clang lld -y
 
-      - name: Baixar SDK OpenOrbis (Via GitHub CLI)
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Baixar SDK OpenOrbis (Link Direto Corrigido)
         run: |
-          # Cria a pasta de destino
+          # Criar pasta para o SDK
           mkdir -p $GITHUB_WORKSPACE/SDK
           
-          # Baixa o SDK usando a ferramenta oficial (evita erro de gzip/html)
-          gh release download v0.5 \
-            --repo openorbis/openorbis-ps4-toolchain \
-            --pattern 'OpenOrbis-PS4-Toolchain-Linux.tar.gz' \
-            --output sdk.tar.gz
+          # Download via curl com User-Agent para evitar o erro de HTML/GZIP
+          curl -L -A "Mozilla/5.0" "https://github.com" -o sdk.tar.gz
           
-          # Extrai o SDK
+          # Extrai o arquivo (o comando -xf detecta o formato automaticamente)
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # Configura as variaveis de ambiente
+          # Configura as variaveis conforme a sua imagem anterior
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
       - name: Compilar Mod (RDR2 v1.32)
         run: |
-          # Força o uso do compilador que acabamos de baixar
+          # Adiciona o compilador ao PATH e executa o Makefile
+          export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
           make
 
       - name: Download do Mod (.prx)
