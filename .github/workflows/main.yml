@@ -1,12 +1,38 @@
-      - name: Baixar SDK do Google Drive (Metodo Forcado)
+name: Build RDR2 PS4 Mod
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do Codigo
+        uses: actions/checkout@v4
+
+      - name: Instalar Compilador e Megatools
+        run: |
+          sudo apt update
+          sudo apt install clang lld make megatools -y
+
+      - name: Baixar SDK do MEGA
         run: |
           mkdir -p $GITHUB_WORKSPACE/SDK
-          # O link abaixo inclui o comando de confirmacao para arquivos grandes
-          gdown "https://drive.google.com" -O sdk.tar.gz
+          # Download usando megadl para links publicos
+          megadl --path sdk.tar.gz 'https://mega.nz'
           
           # Extrai o arquivo (o -xf detecta o formato automaticamente)
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # Configura as variaveis conforme sua imagem
+          # Configura as variaveis conforme a sua imagem anterior
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
+
+      - name: Compilar Mod (Make)
+        run: |
+          export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
+          make
+
+      - name: Download do Mod .prx
+        uses: actions/upload-artifact@v4
+        with:
+          name: RDR2_Assalto_Final
+          path: "*.prx"
