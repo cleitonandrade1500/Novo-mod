@@ -13,19 +13,19 @@ jobs:
           sudo apt update
           sudo apt install clang lld make -y
 
-      - name: 3. Baixar SDK OpenOrbis v0.5.4 (Arquivo da Foto)
+      - name: 3. Baixar SDK OpenOrbis v0.5.4 (Link Direto Corrigido)
         run: |
-          # Criar pasta para o SDK conforme sua imagem de configuracao
+          # Criar pasta para o SDK
           mkdir -p $GITHUB_WORKSPACE/SDK
           
-          # Download do arquivo toolchain-llvm-18.tar.gz (151 MB) da versao v0.5.4
-          # O parametro -A evita que o GitHub envie uma pagina HTML de erro
-          curl -L -A "Mozilla/5.0" "https://github.com" -o toolchain-llvm-18.tar.gz
+          # O SEGREDO: Usar o link do Release com o nome exato da versao 0.5.4
+          # O parametro -A "Mozilla/5.0" engana o servidor para ele nao enviar o erro de 546k
+          curl -L -A "Mozilla/5.0" "https://github.com" -o toolchain.tar.gz
           
-          # Extrai o arquivo (o comando -xf detecta o formato automaticamente e resolve o erro de gzip)
-          tar -xf toolchain-llvm-18.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
+          # Extrai o arquivo (o comando -xf detecta o formato automaticamente)
+          tar -xf toolchain.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # Configura as variaveis conforme a sua imagem anterior
+          # Configura as variaveis de ambiente
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
@@ -35,7 +35,7 @@ jobs:
           export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
           make
 
-      - name: 5. Download do Mod Pronto (.prx)
+      - name: 5. Download do Plugin .prx Pronto
         uses: actions/upload-artifact@v4
         with:
           name: Havana_RDR2_Assalto_Final
