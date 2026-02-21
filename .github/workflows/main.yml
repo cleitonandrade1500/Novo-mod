@@ -13,15 +13,20 @@ jobs:
           sudo apt update
           sudo apt install clang lld make -y
 
-      - name: 3. Baixar SDK OpenOrbis v0.5.4 (Link Direto Corrigido)
+      # O SEGREDO: Usar a ferramenta oficial 'gh' para baixar o release v0.5.4
+      - name: 3. Baixar SDK OpenOrbis v0.5.4 (Metodo Oficial)
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p $GITHUB_WORKSPACE/SDK
-          # O SEGREDO: O link abaixo aponta para o toolchain-llvm-18.tar.gz da v0.5.4
-          # Usamos o parametro -A para evitar o erro de 546k (HTML) da imagem
-          curl -L -A "Mozilla/5.0" "https://github.com" -o toolchain.tar.gz
+          # Baixa o arquivo exato 'toolchain-llvm-18.tar.gz' que aparece na sua imagem
+          gh release download v0.5.4 \
+            --repo OpenOrbis/OpenOrbis-PS4-Toolchain \
+            --pattern 'toolchain-llvm-18.tar.gz' \
+            --output sdk.tar.gz
           
-          # Extrai o arquivo (o comando -xf detecta o formato automaticamente e resolve a linha 22 da imagem)
-          tar -xf toolchain.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
+          # Extrai o SDK detectando o formato automaticamente (sem a flag -z)
+          tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
           # Configura as variaveis conforme a sua imagem anterior
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
