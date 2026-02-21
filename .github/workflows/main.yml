@@ -20,10 +20,10 @@ jobs:
           
           # Download do arquivo toolchain-llvm-18.tar.gz (151 MB) da versao v0.5.4
           # O parametro -A evita que o GitHub envie uma pagina HTML de erro
-          curl -L -A "Mozilla/5.0" "https://github.com" -o toolchain.tar.gz
+          curl -L -A "Mozilla/5.0" "https://github.com" -o toolchain-llvm-18.tar.gz
           
           # Extrai o arquivo (o comando -xf detecta o formato automaticamente e resolve o erro de gzip)
-          tar -xf toolchain.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
+          tar -xf toolchain-llvm-18.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
           # Configura as variaveis conforme a sua imagem anterior
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
