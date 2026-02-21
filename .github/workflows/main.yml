@@ -1,4 +1,4 @@
-name: Build RDR2 PS4 Mod
+name: Build RDR2 PS4 Mod (MEGA SDK)
 on: [push]
 
 jobs:
@@ -16,22 +16,24 @@ jobs:
       - name: Baixar SDK do MEGA
         run: |
           mkdir -p $GITHUB_WORKSPACE/SDK
-          # Download usando megadl para links publicos
-          megadl --path sdk.tar.gz 'https://mega.nz'
+          # Download usando o seu link do MEGA
+          # O megadl garante que o arquivo baixe por completo sem erros de HTML
+          megadl --path toolchain-llvm-18.tar.gz 'https://mega.nz'
           
-          # Extrai o arquivo (o -xf detecta o formato automaticamente)
-          tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
+          # Extrai o arquivo (o -xf detecta o formato automaticamente e resolve o erro da imagem)
+          tar -xf toolchain-llvm-18.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # Configura as variaveis conforme a sua imagem anterior
+          # Configura as variaveis conforme a sua imagem de configuracao
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
       - name: Compilar Mod (Make)
         run: |
+          # Adiciona o compilador ao PATH e executa o Makefile
           export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
           make
 
-      - name: Download do Mod .prx
+      - name: Download do Mod .prx pronto
         uses: actions/upload-artifact@v4
         with:
           name: RDR2_Assalto_Final
