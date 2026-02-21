@@ -1,4 +1,4 @@
-name: Build RDR2 PS4 Mod (CUSA03140 1.32)
+name: Build RDR2 Havana Mod (CUSA03140 1.32)
 on: [push]
 
 jobs:
@@ -8,20 +8,21 @@ jobs:
       - name: 1. Checkout do Codigo
         uses: actions/checkout@v4
 
-      - name: 2. Instalar Clang e LLD (Requisito OpenOrbis)
+      - name: 2. Instalar Compiladores (Clang/LLD)
         run: |
           sudo apt update
           sudo apt install clang lld make -y
 
-      - name: 3. Baixar SDK OpenOrbis Passo-a-Passo (Corrigido)
+      - name: 3. Baixar SDK OpenOrbis (Metodo Havana Mod)
         run: |
-          # Criar pasta para o SDK
+          # Cria a pasta para o SDK
           mkdir -p $GITHUB_WORKSPACE/SDK
           
-          # Download via curl com User-Agent para evitar o erro de HTML/GZIP da sua imagem
+          # Download via curl com link direto da v0.5.2 (Versao mais estavel para o Havana)
+          # O parametro -A "Mozilla/5.0" evita o erro de baixar HTML em vez de GZIP
           curl -L -A "Mozilla/5.0" "https://github.com" -o sdk.tar.gz
           
-          # Extrai o arquivo (o comando -xf detecta o formato automaticamente e resolve o erro da linha 15)
+          # Extrai o arquivo (o comando -xf detecta o formato automaticamente e resolve o erro da imagem)
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
           # Configura as variaveis conforme a sua imagem anterior de configuracao
@@ -30,12 +31,12 @@ jobs:
 
       - name: 4. Compilar Mod (RDR2 CUSA03140 1.32)
         run: |
-          # Adiciona o compilador ao PATH e executa o Makefile
+          # Adiciona o compilador ao PATH e executa o Makefile do Havana
           export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
           make
 
       - name: 5. Download do Plugin .prx Pronto
         uses: actions/upload-artifact@v4
         with:
-          name: RDR2_Assalto_CUSA03140_132
+          name: Havana_RDR2_Assalto_v132
           path: "*.prx"
