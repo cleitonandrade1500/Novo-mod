@@ -1,45 +1,33 @@
-name: Build RDR2 PS4 Mod (CUSA03140 1.32)
+name: Build RDR2 PS4 Mod
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: 1. Checkout do Codigo
+      - name: Checkout do Codigo
         uses: actions/checkout@v4
 
-      - name: 2. Instalar Compiladores (Clang e LLD)
+      - name: Instalar Compiladores (Clang e LLD)
         run: |
           sudo apt update
           sudo apt install clang lld make -y
 
-      - name: 3. Baixar SDK OpenOrbis v0.5.4 (Metodo Oficial)
+      - name: Baixar SDK OpenOrbis v0.5.4
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p $GITHUB_WORKSPACE/SDK
-          # Baixa o toolchain oficial llvm-18 (151MB)
-          gh release download v0.5.4 \
-            --repo OpenOrbis/OpenOrbis-PS4-Toolchain \
-            --pattern 'toolchain-llvm-18.tar.gz' \
-            --output sdk.tar.gz
-          
-          # Extrai o SDK
+          gh release download v0.5.4 --repo OpenOrbis/OpenOrbis-PS4-Toolchain --pattern 'toolchain-llvm-18.tar.gz' --output sdk.tar.gz
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # DEFINE AS VARIÁVEIS DE AMBIENTE (Crucial para o Erro 127)
+          # LOCALIZA O COMPILADOR E CONFIGURA O PATH (Resolve o Erro 127)
+          BIN_PATH=$(find $GITHUB_WORKSPACE/SDK -name "orbis-clang++" -exec dirname {} \;)
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
-          # Adiciona a pasta bin onde o orbis-clang++ realmente está
-          echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
+          echo "$BIN_PATH" >> $GITHUB_PATH
 
-      - name: 4. Compilar Mod (RDR2 1.32)
+      - name: Compilar Mod (RDR2 1.32)
         run: |
-          # Garante que o sistema encontre o compilador orbis-clang++
-          export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
+          # Força a atualização do PATH no shell atual
+          export PATH=$GITHUB_PATH:$PATH
           make
-
-      - name: 5. Download do Plugin .prx Pronto
-        uses: actions/upload-artifact@v4
-        with:
-          name: Havana_RDR2_Assalto_Final
-          path: "*.prx"
