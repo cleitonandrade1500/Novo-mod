@@ -5,25 +5,35 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout do Codigo
+        uses: actions/checkout@v4
 
-      - name: Instalar Compilador
-        run: sudo apt update && sudo apt install clang lld -y
-
-      - name: Baixar SDK (Link Direto)
+      - name: Instalar Dependencias
         run: |
-          mkdir -p SDK
-          # Link direto e estavel para evitar erro de GZIP
-          curl -L "https://huggingface.co" -o sdk.tar.gz
-          tar -xf sdk.tar.gz -C SDK --strip-components=1
+          sudo apt update
+          sudo apt install clang lld make python3-pip -y
+          pip3 install gdown
+
+      - name: Baixar SDK do Google Drive
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/SDK
+          # Usa o ID do seu link para baixar direto pelo gdown (mais seguro)
+          gdown --id 1O1h45BYFL6iI7yyUqVvab53IAVhZqFiT -O sdk.tar.gz
+          
+          # Extrai o arquivo (o -xf detecta o formato sozinho e evita o erro da imagem)
+          tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
+          
+          # Configura as variaveis conforme a sua imagem
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
-      - name: Compilar
-        run: make
+      - name: Compilar Mod (Make)
+        run: |
+          export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
+          make
 
-      - name: Download do Mod (.prx)
+      - name: Download do Mod .prx
         uses: actions/upload-artifact@v4
         with:
-          name: RDR2_Assalto_Final
+          name: RDR2_Assalto_PS4
           path: "*.prx"
