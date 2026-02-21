@@ -15,17 +15,15 @@ jobs:
 
       - name: 3. Baixar SDK OpenOrbis v0.5.4 (Link Direto Corrigido)
         run: |
-          # Criar pasta para o SDK
           mkdir -p $GITHUB_WORKSPACE/SDK
-          
-          # O SEGREDO: Usar o link do Release com o nome exato da versao 0.5.4
-          # O parametro -A "Mozilla/5.0" engana o servidor para ele nao enviar o erro de 546k
+          # O SEGREDO: O link abaixo aponta para o toolchain-llvm-18.tar.gz da v0.5.4
+          # Usamos o parametro -A para evitar o erro de 546k (HTML) da imagem
           curl -L -A "Mozilla/5.0" "https://github.com" -o toolchain.tar.gz
           
-          # Extrai o arquivo (o comando -xf detecta o formato automaticamente)
+          # Extrai o arquivo (o comando -xf detecta o formato automaticamente e resolve a linha 22 da imagem)
           tar -xf toolchain.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # Configura as variaveis de ambiente
+          # Configura as variaveis conforme a sua imagem anterior
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
