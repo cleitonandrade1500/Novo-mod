@@ -8,22 +8,22 @@ jobs:
       - name: 1. Checkout do Codigo
         uses: actions/checkout@v4
 
-      - name: 2. Instalar Compiladores (Clang/LLD)
+      - name: 2. Instalar Compiladores (Clang e LLD)
         run: |
           sudo apt update
           sudo apt install clang lld make -y
 
-      - name: 3. Baixar SDK OpenOrbis v0.5.4 (Nome da Foto)
+      - name: 3. Baixar SDK OpenOrbis v0.5.4 (Arquivo da Foto)
         run: |
-          # Criar pasta para o SDK
+          # Criar pasta para o SDK conforme sua imagem de configuracao
           mkdir -p $GITHUB_WORKSPACE/SDK
           
-          # Download do arquivo EXATO que aparece na sua imagem (v0.5.4)
-          # O parametro -A evita que o GitHub bloqueie o download
-          curl -L -A "Mozilla/5.0" "https://github.com" -o sdk.tar.gz
+          # Download do arquivo toolchain-llvm-18.tar.gz (151 MB) da versao v0.5.4
+          # O parametro -A evita que o GitHub envie uma pagina HTML de erro
+          curl -L -A "Mozilla/5.0" "https://github.com" -o toolchain.tar.gz
           
-          # Extrai o arquivo (o -xf detecta o formato sozinho e resolve o erro de gzip)
-          tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
+          # Extrai o arquivo (o comando -xf detecta o formato automaticamente e resolve o erro de gzip)
+          tar -xf toolchain.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
           # Configura as variaveis conforme a sua imagem anterior
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
