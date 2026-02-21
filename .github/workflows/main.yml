@@ -1,41 +1,37 @@
-name: Build RDR2 PS4 Mod Final 2026
+name: Build RDR2 PS4 Mod (2026)
 on: [push]
 
 jobs:
-  build_mod:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout do Codigo
+      - name: Checkout do Código
         uses: actions/checkout@v4
 
-      - name: Instalar e Compilar Tudo
+      - name: Instalar Dependências (Clang/LLD)
         run: |
-          # 1. Instalar Clang e LLD (Requisito da sua imagem)
-          sudo apt update && sudo apt install clang lld make -y
+          sudo apt update
+          sudo apt install clang lld make -y
 
-          # 2. Baixar SDK OpenOrbis v0.5.2 (Link Blindado)
-          mkdir -p $GITHUB_WORKSPACE/SDK
+      - name: Baixar SDK OpenOrbis Oficial (v0.5.2)
+        run: |
+          # Baixa o SDK direto do GitHub para evitar erros de GZIP ou permissão
           curl -L -A "Mozilla/5.0" "https://github.com" -o sdk.tar.gz
+          mkdir -p $GITHUB_WORKSPACE/SDK
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # 3. Configurar Variaveis de Ambiente
-          export OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK
-          export PATH=$OO_PS4_TOOLCHAIN/bin:$PATH
+          # Configura as variáveis de ambiente necessárias
+          echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
+          echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
-          # 4. Criar o Makefile na hora para evitar erros de "File not found"
-          printf "Target = RDR2_Assalto_2026\nOBJS = main.o\nall: \$(Target).prx\n\$(Target).prx: \$(OBJS)\n\torbis-clang++ -shared -L\$(OO_PS4_TOOLCHAIN)/lib -lSceLibKernel -o \$@ \$^\nmain.o: main.cpp\n\torbis-clang++ -O3 -std=c++17 -fPIC -I\$(OO_PS4_TOOLCHAIN)/include -c -o \$@ \$<" > Makefile
-
-          # 5. Criar o main.cpp (Assalto + Dinheiro + Hook)
-          # Isso garante que a logica de mirar e o spawn de dinheiro ($500) existam
-          if [ ! -f main.cpp ]; then
-            printf "#include <stdint.h>\n#include <stdbool.h>\n#include <orbis/libkernel.h>\nbool roubar_on = true;\nextern \"C\" {\n  int module_start(size_t argc, const void* argv) {\n    int thread_id = sceKernelCreateThread(\"RDR2_Mod\", [](void* arg) -> int {\n      while (true) {\n        if (roubar_on) { /* Logica RDR2 v1.32 */ }\n        sceKernelUsleep(16000);\n      }\n      return 0;\n    }, 0, 0x1000, 0, 0);\n    if (thread_id >= 0) sceKernelStartThread(thread_id, 0, NULL);\n    return 0;\n  }\n  int module_stop(size_t argc, const void* argv) { return 0; }\n}" > main.cpp
-          fi
-
-          # 6. Compilar o Mod de RDR2
+      - name: Compilar Mod (RDR2 CUSA03140 1.32)
+        run: |
+          # Adiciona o compilador ao PATH e executa o Makefile
+          export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
           make
 
-      - name: Download do Mod .prx pronto
+      - name: Download do Plugin .prx Pronto
         uses: actions/upload-artifact@v4
         with:
-          name: RDR2_Assalto_Final_2026
+          name: RDR2_Assalto_PS4_132
           path: "*.prx"
