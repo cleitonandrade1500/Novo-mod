@@ -1,32 +1,33 @@
-name: Build RDR2 PS4 Mod (2026)
+name: Build RDR2 PS4 Mod (CUSA03140 1.32)
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout do Código
+      - name: Checkout do Codigo
         uses: actions/checkout@v4
 
-      - name: Instalar Dependências (Clang/LLD)
+      - name: Instalar Clang e LLD
         run: |
           sudo apt update
           sudo apt install clang lld make -y
 
       - name: Baixar SDK OpenOrbis Oficial (v0.5.2)
         run: |
-          # Baixa o SDK direto do GitHub para evitar erros de GZIP ou permissão
-          curl -L -A "Mozilla/5.0" "https://github.com" -o sdk.tar.gz
           mkdir -p $GITHUB_WORKSPACE/SDK
+          # O parâmetro -A evita o erro de baixar HTML em vez de GZIP
+          curl -L -A "Mozilla/5.0" "https://github.com" -o sdk.tar.gz
+          
+          # Extrai o SDK detectando o formato automaticamente
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # Configura as variáveis de ambiente necessárias
+          # Configura as variaveis conforme sua imagem de configuracao
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
       - name: Compilar Mod (RDR2 CUSA03140 1.32)
         run: |
-          # Adiciona o compilador ao PATH e executa o Makefile
           export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
           make
 
@@ -35,3 +36,4 @@ jobs:
         with:
           name: RDR2_Assalto_PS4_132
           path: "*.prx"
+
