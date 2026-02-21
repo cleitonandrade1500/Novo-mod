@@ -14,13 +14,14 @@ jobs:
           sudo apt install clang lld make python3-pip -y
           pip3 install gdown
 
-      - name: Baixar SDK do Google Drive (Link Direto)
+      - name: Baixar SDK do Google Drive (ID Fixo)
         run: |
           mkdir -p $GITHUB_WORKSPACE/SDK
-          # Usando o link de download direto do seu arquivo
-          gdown "https://drive.google.com" -O sdk.tar.gz
+          # Coloque o ID do seu arquivo no lugar de 'SEU_ID_AQUI'
+          # Exemplo: gdown 1O1h45BYFL6iI7yyUqVvab53IAVhZqFiT -O sdk.tar.gz
+          gdown 1O1h45BYFL6iI7yyUqVvab53IAVhZqFiT -O sdk.tar.gz
           
-          # Extrai o arquivo (o -xf detecta o formato automaticamente)
+          # Extrai o arquivo (o -xf detecta o formato sozinho e evita o erro da imagem)
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
           # Configura as variaveis conforme a sua imagem anterior
