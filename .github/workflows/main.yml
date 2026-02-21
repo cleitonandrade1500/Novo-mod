@@ -13,28 +13,25 @@ jobs:
           sudo apt update
           sudo apt install clang lld make -y
 
-      # O SEGREDO: Usar a ferramenta oficial 'gh' para baixar o release v0.5.4
       - name: 3. Baixar SDK OpenOrbis v0.5.4 (Metodo Oficial)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p $GITHUB_WORKSPACE/SDK
-          # Baixa o arquivo exato 'toolchain-llvm-18.tar.gz' que aparece na sua imagem
           gh release download v0.5.4 \
             --repo OpenOrbis/OpenOrbis-PS4-Toolchain \
             --pattern 'toolchain-llvm-18.tar.gz' \
             --output sdk.tar.gz
           
-          # Extrai o SDK detectando o formato automaticamente (sem a flag -z)
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # Configura as variaveis conforme a sua imagem anterior
+          # Garante que as variaveis fiquem salvas para os proximos passos
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
       - name: 4. Compilar Mod (RDR2 1.32)
         run: |
-          # Adiciona o compilador ao PATH e executa o Makefile
+          # O SEGREDO: Forçar o PATH para encontrar o orbis-clang++
           export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
           make
 
