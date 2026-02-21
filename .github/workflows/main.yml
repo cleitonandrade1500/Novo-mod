@@ -18,20 +18,23 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p $GITHUB_WORKSPACE/SDK
+          # Baixa o toolchain oficial llvm-18 (151MB)
           gh release download v0.5.4 \
             --repo OpenOrbis/OpenOrbis-PS4-Toolchain \
             --pattern 'toolchain-llvm-18.tar.gz' \
             --output sdk.tar.gz
           
+          # Extrai o SDK
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # Garante que as variaveis fiquem salvas para os proximos passos
+          # DEFINE AS VARIÁVEIS DE AMBIENTE (Crucial para o Erro 127)
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
+          # Adiciona a pasta bin onde o orbis-clang++ realmente está
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
       - name: 4. Compilar Mod (RDR2 1.32)
         run: |
-          # O SEGREDO: Forçar o PATH para encontrar o orbis-clang++
+          # Garante que o sistema encontre o compilador orbis-clang++
           export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
           make
 
