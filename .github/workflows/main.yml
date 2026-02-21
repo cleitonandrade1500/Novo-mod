@@ -1,24 +1,24 @@
-name: Build RDR2 PS4 Mod 2026
+name: Build RDR2 PS4 Mod GoldHEN
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout do Codigo
         uses: actions/checkout@v4
 
       - name: Setup GoldHEN SDK
-        # Usa a Action oficial que já tem o OpenOrbis configurado
+        # Esta é a Action correta para 2026
         uses: GoldHEN/goldhen-sdk-action@v1
-        
-      - name: Build Mod
+
+      - name: Compilar Mod (Make)
         run: |
-          # O SDK já está no PATH, só precisamos rodar o make
+          # O SDK já define o OO_PS4_TOOLCHAIN automaticamente
           make
 
-      - name: Download .prx
+      - name: Download do Mod .prx
         uses: actions/upload-artifact@v4
         with:
-          name: RDR2_Assalto_2026
+          name: RDR2_Assalto_GoldHEN
           path: "*.prx"
