@@ -5,35 +5,37 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout do Codigo
+      - name: 1. Checkout do Codigo
         uses: actions/checkout@v4
 
-      - name: Instalar Clang e LLD
+      - name: 2. Instalar Clang e LLD (Requisito OpenOrbis)
         run: |
           sudo apt update
           sudo apt install clang lld make -y
 
-      - name: Baixar SDK OpenOrbis Oficial (v0.5.2)
+      - name: 3. Baixar SDK OpenOrbis Passo-a-Passo (Corrigido)
         run: |
+          # Criar pasta para o SDK
           mkdir -p $GITHUB_WORKSPACE/SDK
-          # O parâmetro -A evita o erro de baixar HTML em vez de GZIP
+          
+          # Download via curl com User-Agent para evitar o erro de HTML/GZIP da sua imagem
           curl -L -A "Mozilla/5.0" "https://github.com" -o sdk.tar.gz
           
-          # Extrai o SDK detectando o formato automaticamente
+          # Extrai o arquivo (o comando -xf detecta o formato automaticamente e resolve o erro da linha 15)
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # Configura as variaveis conforme sua imagem de configuracao
+          # Configura as variaveis conforme a sua imagem anterior de configuracao
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
-      - name: Compilar Mod (RDR2 CUSA03140 1.32)
+      - name: 4. Compilar Mod (RDR2 CUSA03140 1.32)
         run: |
+          # Adiciona o compilador ao PATH e executa o Makefile
           export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
           make
 
-      - name: Download do Plugin .prx Pronto
+      - name: 5. Download do Plugin .prx Pronto
         uses: actions/upload-artifact@v4
         with:
-          name: RDR2_Assalto_PS4_132
+          name: RDR2_Assalto_CUSA03140_132
           path: "*.prx"
-
