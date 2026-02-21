@@ -21,13 +21,14 @@ jobs:
           gh release download v0.5.4 --repo OpenOrbis/OpenOrbis-PS4-Toolchain --pattern 'toolchain-llvm-18.tar.gz' --output sdk.tar.gz
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # LOCALIZA O COMPILADOR E CONFIGURA O PATH (Resolve o Erro 127)
-          BIN_PATH=$(find $GITHUB_WORKSPACE/SDK -name "orbis-clang++" -exec dirname {} \;)
+          # RESOLVE O ERRO "Not a directory":
+          # Localiza a pasta 'bin' que contém o executável real e ignora pastas fantasmas
+          REAL_BIN=$(find $GITHUB_WORKSPACE/SDK -type d -name "bin" | head -n 1)
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
-          echo "$BIN_PATH" >> $GITHUB_PATH
+          echo "$REAL_BIN" >> $GITHUB_PATH
 
       - name: Compilar Mod (RDR2 1.32)
         run: |
-          # Força a atualização do PATH no shell atual
+          # Força o uso do binário correto no ambiente atual
           export PATH=$GITHUB_PATH:$PATH
           make
