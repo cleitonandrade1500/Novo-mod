@@ -8,19 +8,22 @@ jobs:
       - name: Checkout do Codigo
         uses: actions/checkout@v4
 
-      - name: Instalar Dependencias
+      - name: Instalar Compilador e Gdown
         run: |
           sudo apt update
           sudo apt install clang lld make python3-pip -y
+          # Instala a ferramenta que voce mandou no help
           pip3 install gdown
 
-      - name: Baixar SDK do Google Drive
+      - name: Baixar SDK do Google Drive (Metodo Gdown)
         run: |
           mkdir -p $GITHUB_WORKSPACE/SDK
-          # Usa o ID do seu link para baixar direto pelo gdown (mais seguro)
-          gdown --id 1O1h45BYFL6iI7yyUqVvab53IAVhZqFiT -O sdk.tar.gz
           
-          # Extrai o arquivo (o -xf detecta o formato sozinho e evita o erro da imagem)
+          # Baixa o seu arquivo usando o ID do link que voce mandou
+          # O ID 1O1h45BYFL6iI7yyUqVvab53IAVhZqFiT vem do seu link do Drive
+          gdown 1O1h45BYFL6iI7yyUqVvab53IAVhZqFiT -O sdk.tar.gz
+          
+          # Extrai o SDK (o -xf detecta o formato sozinho conforme o manual)
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
           # Configura as variaveis conforme a sua imagem
@@ -29,11 +32,12 @@ jobs:
 
       - name: Compilar Mod (Make)
         run: |
+          # Adiciona o compilador ao PATH e executa
           export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
           make
 
       - name: Download do Mod .prx
         uses: actions/upload-artifact@v4
         with:
-          name: RDR2_Assalto_PS4
+          name: RDR2_Assalto_Final
           path: "*.prx"
