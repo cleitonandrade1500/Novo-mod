@@ -1,38 +1,24 @@
-name: Build RDR2 PS4 Mod (MEGA Fix)
+name: Build RDR2 PS4 Mod 2026
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout do Codigo
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Instalar Compilador e Megatools
+      - name: Setup GoldHEN SDK
+        # Usa a Action oficial que já tem o OpenOrbis configurado
+        uses: GoldHEN/goldhen-sdk-action@v1
+        
+      - name: Build Mod
         run: |
-          sudo apt update
-          sudo apt install clang lld make megatools -y
-
-      - name: Baixar SDK do MEGA
-        run: |
-          mkdir -p $GITHUB_WORKSPACE/SDK
-          # O link deve estar entre aspas simples (' ') para o GitHub Actions não pular o download
-          megadl --path toolchain-llvm-18.tar.gz 'https://mega.nz'
-          
-          # Extrai o arquivo baixado
-          tar -xf toolchain-llvm-18.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
-          
-          # Configura as variaveis conforme a sua imagem de configuracao
-          echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
-          echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
-
-      - name: Compilar Mod (Make)
-        run: |
-          export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
+          # O SDK já está no PATH, só precisamos rodar o make
           make
 
-      - name: Download do Mod .prx pronto
+      - name: Download .prx
         uses: actions/upload-artifact@v4
         with:
-          name: RDR2_Assalto_Final
+          name: RDR2_Assalto_2026
           path: "*.prx"
