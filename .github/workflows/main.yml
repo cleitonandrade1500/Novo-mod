@@ -1,4 +1,4 @@
-name: Build RDR2 PS4 Mod (MEGA SDK)
+name: Build RDR2 PS4 Mod (MEGA Fix)
 on: [push]
 
 jobs:
@@ -16,11 +16,10 @@ jobs:
       - name: Baixar SDK do MEGA
         run: |
           mkdir -p $GITHUB_WORKSPACE/SDK
-          # Download usando o seu link do MEGA
-          # O megadl garante que o arquivo baixe por completo sem erros de HTML
+          # O link deve estar entre aspas simples (' ') para o GitHub Actions não pular o download
           megadl --path toolchain-llvm-18.tar.gz 'https://mega.nz'
           
-          # Extrai o arquivo (o -xf detecta o formato automaticamente e resolve o erro da imagem)
+          # Extrai o arquivo baixado
           tar -xf toolchain-llvm-18.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
           # Configura as variaveis conforme a sua imagem de configuracao
@@ -29,7 +28,6 @@ jobs:
 
       - name: Compilar Mod (Make)
         run: |
-          # Adiciona o compilador ao PATH e executa o Makefile
           export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
           make
 
