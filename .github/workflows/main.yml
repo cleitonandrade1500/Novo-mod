@@ -12,27 +12,23 @@ jobs:
         run: |
           sudo apt update
           sudo apt install clang lld make python3-pip -y
-          # Instala a ferramenta que voce mandou no help
           pip3 install gdown
 
-      - name: Baixar SDK do Google Drive (Metodo Gdown)
+      - name: Baixar SDK do Google Drive (Link Direto)
         run: |
           mkdir -p $GITHUB_WORKSPACE/SDK
+          # Usando o link de download direto do seu arquivo
+          gdown "https://drive.google.com" -O sdk.tar.gz
           
-          # Baixa o seu arquivo usando o ID do link que voce mandou
-          # O ID 1O1h45BYFL6iI7yyUqVvab53IAVhZqFiT vem do seu link do Drive
-          gdown 1O1h45BYFL6iI7yyUqVvab53IAVhZqFiT -O sdk.tar.gz
-          
-          # Extrai o SDK (o -xf detecta o formato sozinho conforme o manual)
+          # Extrai o arquivo (o -xf detecta o formato automaticamente)
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # Configura as variaveis conforme a sua imagem
+          # Configura as variaveis conforme a sua imagem anterior
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
       - name: Compilar Mod (Make)
         run: |
-          # Adiciona o compilador ao PATH e executa
           export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
           make
 
