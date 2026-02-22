@@ -1,34 +1,49 @@
-name: Build RDR2 PS4 Mod
+name: construir
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout do Codigo
+      - name: Confira o Código
         uses: actions/checkout@v4
 
       - name: Instalar Compiladores (Clang e LLD)
         run: |
           sudo apt update
-          sudo apt install clang lld make -y
+          sudo apt install clang lld make python3-pip -y
+          pip3 install gdown
 
       - name: Baixar SDK OpenOrbis v0.5.4
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
+          # 1. Cria a pasta limpa para o SDK
           mkdir -p $GITHUB_WORKSPACE/SDK
-          gh release download v0.5.4 --repo OpenOrbis/OpenOrbis-PS4-Toolchain --pattern 'toolchain-llvm-18.tar.gz' --output sdk.tar.gz
+          
+          # 2. Baixa o SEU arquivo do Google Drive (ID: 1O1h45BYFL6iI7yyUqVvab53IAVhZqFiT)
+          gdown 1O1h45BYFL6iI7yyUqVvab53IAVhZqFiT -O sdk.tar.gz
+          
+          # 3. Extrai os arquivos (o -xf detecta o formato automaticamente)
           tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # RESOLVE O ERRO "Not a directory":
-          # Localiza a pasta 'bin' que contém o executável real e ignora pastas fantasmas
-          REAL_BIN=$(find $GITHUB_WORKSPACE/SDK -type d -name "bin" | head -n 1)
+          # 4. CORREÇÃO DO ERRO 127: Dá permissão de execução aos arquivos binários
+          # Sem isso, o Linux acha que o compilador é uma pasta ou texto, gerando o erro da sua imagem
+          chmod -R +x $GITHUB_WORKSPACE/SDK/bin/
+          
+          # 5. Configura as variáveis de ambiente conforme sua imagem de configuração
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
-          echo "$REAL_BIN" >> $GITHUB_PATH
+          echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
-      - name: Compilar Mod (RDR2 1.32)
+      - name: Modificação do compilador (RDR2 1.32)
         run: |
-          # Força o uso do binário correto no ambiente atual
-          export PATH=$GITHUB_PATH:$PATH
-          make
+          # Garante que o compilador seja reconhecido no PATH do sistema
+          export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
+          
+          # Executa o make apontando DIRETAMENTE para o arquivo binário do compilador
+          # Isso evita o erro "Not a directory" que aparece no seu log
+          make CC=$GITHUB_WORKSPACE/SDK/bin/orbis-clang++ CXX=$GITHUB_WORKSPACE/SDK/bin/orbis-clang++
+
+      - name: Trabalho concluido
+        uses: actions/upload-artifact@v4
+        with:
+          name: RDR2_Assalto_Final_PRX
+          path: "*.prx"
