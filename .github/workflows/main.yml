@@ -8,42 +8,29 @@ jobs:
       - name: Confira o Código
         uses: actions/checkout@v4
 
-      - name: Instalar Compiladores e Megatools
-        run: |
-          sudo apt update
-          sudo apt install clang lld make megatools -y
+      - name: Instalar Ferramentas
+        run: sudo apt update && sudo apt install clang lld make megatools -y
 
-      - name: Baixar SDK do MEGA
+      - name: Baixar e Extrair SDK
         run: |
-          # 1. Cria a pasta limpa para o SDK
-          mkdir -p $GITHUB_WORKSPACE/SDK
+          # Baixa do MEGA
+          megadl "https://mega.nz" --path sdk.tar.gz
           
-          # 2. Baixa o seu arquivo específico do MEGA
-          megadl "https://mega.nz" --path toolchain-llvm-18.tar.gz
+          # Extrai tudo na pasta atual (sem criar subpastas complicadas)
+          tar -xf sdk.tar.gz
           
-          # 3. Extrai o SDK para a pasta definida
-          tar -xf toolchain-llvm-18.tar.gz -C $GITHUB_WORKSPACE/SDK
-          
-          # 4. CORREÇÃO: Procura onde está a pasta 'bin' e dá permissão de execução
-          # Isso resolve o erro "No such file or directory" da sua imagem
-          find $GITHUB_WORKSPACE/SDK -type d -name "bin" -exec chmod -R +x {} +
-          
-          # 5. Configura as variáveis de ambiente dinamicamente
-          BIN_PATH=$(find $GITHUB_WORKSPACE/SDK -type d -name "bin" | head -n 1)
-          echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
-          echo "$BIN_PATH" >> $GITHUB_PATH
-          echo "FINAL_BIN=$BIN_PATH" >> $GITHUB_ENV
+          # Dá permissão de execução para o compilador em qualquer lugar que ele esteja
+          chmod -R +x .
 
       - name: Modificação do compilador (RDR2 1.32)
         run: |
-          # Usa o caminho real encontrado no passo anterior
-          export PATH=$FINAL_BIN:$PATH
-          
-          # Executa o make apontando para o compilador real
-          make CC=$FINAL_BIN/orbis-clang++ CXX=$FINAL_BIN/orbis-clang++
+          # Procura o orbis-clang++ e roda o make usando ele
+          COMPILADOR=$(find . -name "orbis-clang++" | head -n 1)
+          export OO_PS4_TOOLCHAIN=$(dirname $(dirname $COMPILADOR))
+          make CC=$COMPILADOR CXX=$COMPILADOR
 
-      - name: Trabalho concluído
+      - name: Trabalho concluido
         uses: actions/upload-artifact@v4
         with:
-          name: RDR2_Assalto_Final_PRX
+          name: RDR2_Mod_PS4
           path: "*.prx"
