@@ -8,41 +8,39 @@ jobs:
       - name: Confira o Código
         uses: actions/checkout@v4
 
-      - name: Instalar Compiladores (Clang e LLD)
+      - name: Instalar Compiladores e Megatools
         run: |
           sudo apt update
-          sudo apt install clang lld make python3-pip -y
-          pip3 install gdown
+          sudo apt install clang lld make megatools -y
 
-      - name: Baixar SDK OpenOrbis v0.5.4
+      - name: Baixar SDK do MEGA
         run: |
           # 1. Cria a pasta limpa para o SDK
           mkdir -p $GITHUB_WORKSPACE/SDK
           
-          # 2. Baixa o SEU arquivo do Google Drive (ID: 1O1h45BYFL6iI7yyUqVvab53IAVhZqFiT)
-          gdown 1O1h45BYFL6iI7yyUqVvab53IAVhZqFiT -O sdk.tar.gz
+          # 2. Baixa o seu arquivo específico do MEGA
+          megadl "https://mega.nz/file/w6Z2HBpJ#YN7r2-M8K_t4htfjyIV3PahNsOO6IxSE5C6QIqoqaFQ" --path toolchain-llvm-18.tar.gz
           
-          # 3. Extrai os arquivos (o -xf detecta o formato automaticamente)
-          tar -xf sdk.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
+          # 3. Extrai o SDK para a pasta definida
+          tar -xf toolchain-llvm-18.tar.gz -C $GITHUB_WORKSPACE/SDK --strip-components=1
           
-          # 4. CORREÇÃO DO ERRO 127: Dá permissão de execução aos arquivos binários
-          # Sem isso, o Linux acha que o compilador é uma pasta ou texto, gerando o erro da sua imagem
+          # 4. CORREÇÃO DO ERRO 127: Ativa os binários (essencial para o MEGA)
           chmod -R +x $GITHUB_WORKSPACE/SDK/bin/
           
-          # 5. Configura as variáveis de ambiente conforme sua imagem de configuração
+          # 5. Configura as variáveis de ambiente para o sistema
           echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/SDK" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/SDK/bin" >> $GITHUB_PATH
 
       - name: Modificação do compilador (RDR2 1.32)
         run: |
-          # Garante que o compilador seja reconhecido no PATH do sistema
+          # Garante que o terminal encontre o orbis-clang++
           export PATH=$GITHUB_WORKSPACE/SDK/bin:$PATH
           
-          # Executa o make apontando DIRETAMENTE para o arquivo binário do compilador
-          # Isso evita o erro "Not a directory" que aparece no seu log
+          # Executa o make apontando diretamente para o arquivo binário do compilador
+          # Isso resolve o erro "Not a directory" da sua imagem anterior
           make CC=$GITHUB_WORKSPACE/SDK/bin/orbis-clang++ CXX=$GITHUB_WORKSPACE/SDK/bin/orbis-clang++
 
-      - name: Trabalho concluido
+      - name: Trabalho concluído
         uses: actions/upload-artifact@v4
         with:
           name: RDR2_Assalto_Final_PRX
