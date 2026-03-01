@@ -1,22 +1,25 @@
-# Nome do arquivo final
-Target      = Havana_RDR2_Mod
-OBJS        = main.o
+ifndef OO_PS4_TOOLCHAIN
+    $(error OO_PS4_TOOLCHAIN is not set)
+endif
 
-# O compilador (o GitHub Actions vai achar o binário no PATH)
-CC          = orbis-clang++
+target := ps4_plugin
+# Nome do arquivo final que você vai baixar
+NAME := JohnBodyguard
+OUTDIR := $(shell pwd)
+ID     := RDR2_JOHN_MOD
+CONTENT_ID := UP4139-CUSA03041_00-0000000000000000
 
-# Configurações de busca de arquivos
-CFLAGS      = -O3 -std=c++17 -fPIC -I$(OO_PS4_TOOLCHAIN)/include
-LDFLAGS     = -shared -L$(OO_PS4_TOOLCHAIN)/lib -lSceLibKernel -lScePad -lc++
+# Bibliotecas de sistema necessárias
+libraries := -lSceLibKernel -lSceNet -lScePad
 
-all: $(Target).prx
+# Flags de compilação para C++
+CFLAGS += -O2 -std=c++11 -Wno-unused-variable
+CXXFLAGS += -O2 -std=c++11
 
-$(Target).prx: $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+include $(OO_PS4_TOOLCHAIN)/scripts/ext.mk
 
-# Regra de compilação do objeto
-main.o: main.cpp
-	$(CC) $(CFLAGS) -c -o $@ $<
+# Regra para converter o ELF gerado em PRX
+$(NAME).prx: $(NAME).elf
+	$(ORBIS_OBJCOPY) --strip-unneeded -O binary $< $@
 
-clean:
-	rm -rf $(Target).prx $(OBJS)
+include $(OO_PS4_TOOLCHAIN)/scripts/target.mk
