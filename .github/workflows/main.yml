@@ -10,7 +10,7 @@ jobs:
 
       - name: Install OpenOrbis Toolchain
         run: |
-          wget https://github.com/0x199/OpenOrbis-PS4-Toolchain/
+          wget https://github.com/OpenOrbis/OpenOrbis-PS4-Toolchain/releases/download/v0.5.4/toolchain-llvm-18.tar.gz
           sudo tar -xvf OpenOrbis-PS4-Toolchain.tar.gz -C /opt
           echo "OO_PS4_TOOLCHAIN=/opt/OpenOrbis/PS4Toolchain" >> $GITHUB_ENV
 
