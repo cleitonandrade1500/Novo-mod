@@ -1,36 +1,26 @@
-name: construir
+name: Build RDR2 Mod
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Confira o Código
-        uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Instalar Ferramentas
-        run: sudo apt update && sudo apt install clang lld make megatools -y
-
-      - name: Baixar e Extrair SDK
+      - name: Install OpenOrbis Toolchain
         run: |
-          # Baixa do MEGA
-          megadl "https://mega.nz" --path sdk.tar.gz
-          
-          # Extrai tudo na pasta atual (sem criar subpastas complicadas)
-          tar -xf sdk.tar.gz
-          
-          # Dá permissão de execução para o compilador em qualquer lugar que ele esteja
-          chmod -R +x .
+          wget https://github.com
+          sudo tar -xvf OpenOrbis-PS4-Toolchain.tar.gz -C /opt
+          echo "OO_PS4_TOOLCHAIN=/opt/OpenOrbis/PS4Toolchain" >> $GITHUB_ENV
 
-      - name: Modificação do compilador (RDR2 1.32)
+      - name: Build Mod PRX
         run: |
-          # Procura o orbis-clang++ e roda o make usando ele
-          COMPILADOR=$(find . -name "orbis-clang++" | head -n 1)
-          export OO_PS4_TOOLCHAIN=$(dirname $(dirname $COMPILADOR))
-          make CC=$COMPILADOR CXX=$COMPILADOR
+          export PATH=$PATH:$OO_PS4_TOOLCHAIN/bin
+          make
 
-      - name: Trabalho concluido
-        uses: actions/upload-artifact@v4
+      - name: Upload Mod
+        uses: actions/upload-artifact@v3
         with:
-          name: RDR2_Mod_PS4
-          path: "*.prx"
+          name: JohnBodyguard-Mod
+          path: ./JohnBodyguard.prx
