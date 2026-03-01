@@ -3,22 +3,19 @@ ifndef OO_PS4_TOOLCHAIN
 endif
 
 target := ps4_plugin
-# Nome do arquivo final que você vai baixar
 NAME := JohnBodyguard
 OUTDIR := $(shell pwd)
-ID     := RDR2_JOHN_MOD
+ID     := RDR2_JOHN_2026
 CONTENT_ID := UP4139-CUSA03041_00-0000000000000000
 
-# Bibliotecas de sistema necessárias
-libraries := -lSceLibKernel -lSceNet -lScePad
-
-# Flags de compilação para C++
-CFLAGS += -O2 -std=c++11 -Wno-unused-variable
-CXXFLAGS += -O2 -std=c++11
+# Adicionado lstdc++ para evitar erros de compilação de thread/chrono
+libraries := -lSceLibKernel -lSceNet -lScePad -lstdc++ -lm
 
 include $(OO_PS4_TOOLCHAIN)/scripts/ext.mk
 
-# Regra para converter o ELF gerado em PRX
+CFLAGS += -O2 -std=c11
+CXXFLAGS += -O2 -std=c++11
+
 $(NAME).prx: $(NAME).elf
 	$(ORBIS_OBJCOPY) --strip-unneeded -O binary $< $@
 
