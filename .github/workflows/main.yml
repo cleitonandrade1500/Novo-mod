@@ -1,4 +1,4 @@
-name: Build RDR2 Mod 2026
+name: Build RDR2 Mod
 on: [push]
 
 jobs:
@@ -10,17 +10,26 @@ jobs:
 
       - name: Install OpenOrbis Toolchain
         run: |
-          wget https://github.com/OpenOrbis/OpenOrbis-PS4-Toolchain/releases/download/v0.5.4/toolchain-llvm-18.tar.gz
+          # Baixa o toolchain
+          wget https://github.com
+          
+          # Garante que o diretório de destino existe
+          sudo mkdir -p /opt/OpenOrbis/PS4Toolchain
+          
+          # Extrai o arquivo que foi baixado (independente do nome exato)
           sudo tar -xvf OpenOrbis-PS4-Toolchain.tar.gz -C /opt
+          
+          # Define a variável de ambiente para os próximos passos
           echo "OO_PS4_TOOLCHAIN=/opt/OpenOrbis/PS4Toolchain" >> $GITHUB_ENV
 
       - name: Build Mod PRX
         run: |
+          # Adiciona o compilador ao PATH e roda o make
           export PATH=$PATH:$OO_PS4_TOOLCHAIN/bin
           make
 
       - name: Upload Mod
         uses: actions/upload-artifact@v4
         with:
-          name: JohnBodyguard-Plugin
-          path: ./JohnBodyguard.prx
+          name: JohnBodyguard-Mod
+          path: ./*.prx
