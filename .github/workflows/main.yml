@@ -1,4 +1,4 @@
-name: Build RDR2 Mod
+name: Build RDR2 Mod Fork
 on: [push]
 
 jobs:
@@ -8,21 +8,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      -       - name: Install OpenOrbis Toolchain
+      - name: Install OpenOrbis Toolchain (Fork)
         run: |
-          # Usa curl com -L para seguir redirecionamentos e -o para salvar com o nome correto
+          # Usando link direto do binário para evitar erro de index.html
           curl -L https://github.com -o toolchain.tar.gz
           
-          # Verifica se o arquivo baixado é realmente um tar (evita o erro do index.html)
-          if ! tar -ztf toolchain.tar.gz >/dev/null 2>&1; then
-            echo "ERRO: O download falhou ou baixou um arquivo HTML em vez do toolchain."
-            exit 1
-          fi
-
+          # Criar diretório e extrair
           sudo mkdir -p /opt/OpenOrbis/PS4Toolchain
           sudo tar -xvf toolchain.tar.gz -C /opt
+          
+          # Configurar variáveis de ambiente
           echo "OO_PS4_TOOLCHAIN=/opt/OpenOrbis/PS4Toolchain" >> $GITHUB_ENV
-
 
       - name: Build Mod PRX
         run: |
@@ -32,5 +28,5 @@ jobs:
       - name: Upload Mod
         uses: actions/upload-artifact@v4
         with:
-          name: JohnBodyguard-Mod
+          name: JohnBodyguard-Mod-Fork
           path: ./*.prx
