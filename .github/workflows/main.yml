@@ -10,14 +10,16 @@ jobs:
 
       - name: Install OpenOrbis Toolchain
         run: |
-          # Baixa a versão estável v0.5.4
-          wget https://github.com
+          # Baixa o arquivo usando o link direto do GitHub Releases
+          curl -L -o toolchain.tar.gz https://github.com
           
-          # Garante o diretório e extrai usando o nome correto do arquivo baixado
+          # Cria a pasta de destino
           sudo mkdir -p /opt/OpenOrbis/PS4Toolchain
-          sudo tar -xvf toolchain-llvm-18.tar.gz -C /opt
           
-          # Configura o ambiente
+          # Extrai o arquivo
+          sudo tar -xvf toolchain.tar.gz -C /opt
+          
+          # Configura a variável de ambiente
           echo "OO_PS4_TOOLCHAIN=/opt/OpenOrbis/PS4Toolchain" >> $GITHUB_ENV
 
       - name: Build Mod PRX
